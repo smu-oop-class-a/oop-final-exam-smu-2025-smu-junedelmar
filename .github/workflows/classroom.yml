@@ -161,3 +161,13 @@ jobs:
         with:
           runners: >
             test-personmodel,
+            test-person-attributes,
+            test-dir-inherit,
+            test-dir-props,
+            test-adddirector,
+            test-getall,
+            test-getbyid,
+            test-controls,
+            test-validation,
+            test-loadgrid,
+            test-compilation

@@ -11,152 +11,36 @@ permissions:
   contents: read
 
 jobs:
-  autograde:
-    runs-on: ubuntu-latest
+  run-autograding-tests:
+    runs-on: ubuntu-latest # Running on Ubuntu as requested
+    if: github.actor != 'github-classroom[bot]'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      # ----------------------------------------------------------
-      # TESTS
-      # ----------------------------------------------------------
-
-      - name: PersonModel Class
-        id: test-personmodel
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: PersonModel Class
-          command: "grep -R \"class PersonModel\" -n OOP.FinalTerm.Exam/Model || true"
-          expected-output: "PersonModel"
-          comparison-method: contains
-          points: 5
-
-      - name: PersonModel Attributes
-        id: test-person-attributes
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: SQLite Attributes
-          command: "grep -R \"PrimaryKey\" OOP.FinalTerm.Exam/Model/PersonModel.cs || true"
-          expected-output: "PrimaryKey"
-          comparison-method: contains
-          points: 2
-
-      - name: DirectorModel Inheritance
-        id: test-dir-inherit
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: DirectorModel Inheritance
-          command: "grep -R \"class DirectorModel .*: PersonModel\" OOP.FinalTerm.Exam/Model || true"
-          expected-output: ": PersonModel"
-          comparison-method: contains
-          points: 3
-
-      - name: DirectorModel Properties
-        id: test-dir-props
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: DirectorModel Properties
-          command: |
-            grep -R \"Genres\" OOP.FinalTerm.Exam/Model/DirectorModel.cs &&
-            grep -R \"TotalMoviesCreated\" OOP.FinalTerm.Exam/Model/DirectorModel.cs || true
-          expected-output: "TotalMoviesCreated"
-          comparison-method: contains
-          points: 3
-
-      - name: AddDirector Method
-        id: test-adddirector
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: AddDirector Insert()
-          command: "grep -R \"Insert\" OOP.FinalTerm.Exam/Repository/DirectorRepository.cs || true"
-          expected-output: "Insert"
-          comparison-method: contains
-          points: 3
-
-      - name: GetAllDirectors Method
-        id: test-getall
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: GetAllDirectors
-          command: "grep -R \"Table.*ToList\" OOP.FinalTerm.Exam/Repository/DirectorRepository.cs || true"
-          expected-output: "ToList"
-          comparison-method: contains
-          points: 3
-
-      - name: GetDirectorById Method
-        id: test-getbyid
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: GetDirectorById
-          command: "grep -R \"Find\" OOP.FinalTerm.Exam/Repository/DirectorRepository.cs || true"
-          expected-output: "Find"
-          comparison-method: contains
-          points: 3
-
-      - name: DirectorForm Controls
-        id: test-controls
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: Form Controls
-          command: |
-            grep -R \"txtFirstName\" OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs &&
-            grep -R \"txtLastName\" OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs &&
-            grep -R \"txtGenres\" OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs &&
-            grep -R \"numTotalMovies\" OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs || true
-          expected-output: "numTotalMovies"
-          comparison-method: contains
-          points: 3
-
-      - name: Validation Check
-        id: test-validation
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: Validation
-          command: "grep -R \"IsNullOrWhiteSpace\" OOP.FinalTerm.Exam/Views/DirectorForm.cs || true"
-          expected-output: "IsNullOrWhiteSpace"
-          comparison-method: contains
-          points: 3
-
-      - name: LoadDirectorsToGrid
-        id: test-loadgrid
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: LoadDirectorsToGrid
-          command: "grep -R \"LoadDirectorsToGrid\" OOP.FinalTerm.Exam/Views/SettingsForm.cs || true"
-          expected-output: "LoadDirectorsToGrid"
-          comparison-method: contains
-          points: 4
-
-      - name: Compilation Check
-        id: test-compilation
-        uses: classroom-resources/autograding-io-grader@v1
-        with:
-          test-name: Compilation
-          command: |
-            test -f OOP.FinalTerm.Exam/OOP.FinalTerm.Exam.csproj
-          expected-output: ""
-          comparison-method: exact
-          points: 2
-
-      # ----------------------------------------------------------
-      # REPORTER (FIXED — no indentation error, no bad formatting)
-      # ----------------------------------------------------------
-      - name: Autograding Reporter
-        uses: classroom-resources/autograding-grading-reporter@v1
-
-        env:
-          personmodel-results: ${{ steps.test-personmodel.outputs.result }}
-          person-attributes-results: ${{ steps.test-person-attributes.outputs.result }}
-          dir-inherit-results: ${{ steps.test-dir-inherit.outputs.result }}
-          dir-props-results: ${{ steps.test-dir-props.outputs.result }}
-          adddirector-results: ${{ steps.test-adddirector.outputs.result }}
-          getall-results: ${{ steps.test-getall.outputs.result }}
-          getbyid-results: ${{ steps.test-getbyid.outputs.result }}
-          controls-results: ${{ steps.test-controls.outputs.result }}
-          validation-results: ${{ steps.test-validation.outputs.result }}
-          loadgrid-results: ${{ steps.test-loadgrid.outputs.result }}
-          compilation-results: ${{ steps.test-compilation.outputs.result }}
-
-        with:
-          runners: test-personmodel
+    ####################################################################
+    # EXECUTION STEP
+    # Runs the ExamEvaluator.ps1 script using PowerShell Core (pwsh)
+    ####################################################################
+    - name: Run PowerShell Exam Evaluator
+      id: exam-evaluator
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: "OOP Final Exam Evaluation (Max 50 Points)"
+        # Execute the script using pwsh. Adjust filename if necessary.
+        command: "pwsh ./ExamEvaluator.ps1" 
+        timeout: 60
+        # The script output must contain "Total Score: [Number]" for the grader to work.
+        comparison-method: contains
+        expected-output: "Total Score:"
+        max-score: 50
+        
+    ####################################################################
+    # REPORTING STEP
+    # Sends the score back to the GitHub Classroom UI
+    ####################################################################
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      with:
+        runners: exam-evaluator

@@ -199,7 +199,7 @@ jobs:
     # ========================================================
     # Reporter
     # ========================================================
-    - name: Autograding Reporter
-      uses: classroom-resources/autograding-grading-reporter@v1
-      with:
-        runners: person-class,person-attribs,director-inherit,director-props,repo-ctor,repo-add,repo-getall,repo-getbyid,form-controls,form-getdirector,form-validation,settings-load,compilation
+   - name: Autograding Reporter
+     uses: classroom-resources/autograding-grading-reporter@v1
+     with:
+       runners: "person-class,person-attribs,director-inherit,director-props,repo-ctor,repo-add,repo-getall,repo-getbyid,form-controls,form-getdirector,form-validation,settings-load,compilation"

@@ -1,47 +1,29 @@
 name: Autograding Tests
-
-on:
-  - push
-  - workflow_dispatch
-  - repository_dispatch
-
+'on':
+- push
+- repository_dispatch
 permissions:
   checks: write
   actions: read
   contents: read
-
 jobs:
   run-autograding-tests:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     if: github.actor != 'github-classroom[bot]'
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-      ####################################################################
-      # This is where you place your autograding tests
-      # For more information on this runner:
-      # https://github.com/classroom-resources/autograding-io-grader
-      ####################################################################
-    - name: Run ExamEvaluator.ps1
-      uses: classroom-resources/autograding-io-grader@v1
+    - name: Exam Evaluator
       id: exam-evaluator
+      uses: classroom-resources/autograding-command-grader@v1
       with:
-        test-name: "OOP Final Exam Evaluator"
-        command: |
-          pwsh .\ExamEvaluator.ps1
-        timeout: 60
-        comparison-method: substring
-        expected-output: "Total Score:"
-
-    ####################################################################
-    # Reporter — sends autograde result back to GitHub Classroom
-    # Documentation:
-    # https://github.com/classroom-resources/autograding-grading-reporter
-    ####################################################################
+        test-name: Exam Evaluator
+        setup-command: ''
+        command: "./ExamEvaluator.ps1"
+        timeout: 10
     - name: Autograding Reporter
       uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        EXAM-EVALUATOR_RESULTS: "${{steps.exam-evaluator.outputs.result}}"
       with:
-        # ✅ Must NOT be quoted; must be a comma-separated list
         runners: exam-evaluator

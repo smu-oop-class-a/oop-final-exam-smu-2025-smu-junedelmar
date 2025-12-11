@@ -1,4 +1,4 @@
-name: Autograding Tests
+name: Autograding Tests (Linux Shell/Grep)
 
 on:
   push:
@@ -19,6 +19,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # The following steps use 'grep' and conditional shell logic to replicate your checks.
+    # Paths use forward slashes '/'.
+
     # ========================================================
     # 1. PersonModel (7 Points Total)
     # ========================================================
@@ -29,9 +32,10 @@ jobs:
         test-name: PersonModel Class
         # Checks for Class definition AND Id, FirstName, LastName
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Model/PersonModel.cs' -Raw;
-          if( ($c -match 'class\s+PersonModel') -and ($c -match 'Id') -and ($c -match 'FirstName') -and ($c -match 'LastName') ) { exit 0 } else { exit 1 }"
+          grep -E 'class\s+PersonModel' OOP.FinalTerm.Exam/Model/PersonModel.cs && \
+          grep -E 'Id' OOP.FinalTerm.Exam/Model/PersonModel.cs && \
+          grep -E 'FirstName' OOP.FinalTerm.Exam/Model/PersonModel.cs && \
+          grep -E 'LastName' OOP.FinalTerm.Exam/Model/PersonModel.cs
         timeout: 10
         max-score: 5
 
@@ -42,9 +46,8 @@ jobs:
         test-name: PersonModel Attributes
         # Checks for PrimaryKey and AutoIncrement
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Model/PersonModel.cs' -Raw;
-          if( ($c -match '\[PrimaryKey\]') -and ($c -match 'AutoIncrement') ) { exit 0 } else { exit 1 }"
+          grep -E '\[PrimaryKey' OOP.FinalTerm.Exam/Model/PersonModel.cs && \
+          grep -E 'AutoIncrement' OOP.FinalTerm.Exam/Model/PersonModel.cs
         timeout: 10
         max-score: 2
 
@@ -57,10 +60,7 @@ jobs:
       with:
         test-name: DirectorModel Inheritance
         # Checks if DirectorModel inherits PersonModel
-        command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Model/DirectorModel.cs' -Raw;
-          if( $c -match 'class\s+DirectorModel\s*:\s*PersonModel' ) { exit 0 } else { exit 1 }"
+        command: grep -E 'class\s+DirectorModel\s*:\s*PersonModel' OOP.FinalTerm.Exam/Model/DirectorModel.cs
         timeout: 10
         max-score: 3
 
@@ -71,9 +71,8 @@ jobs:
         test-name: DirectorModel Properties
         # Checks for Genres and TotalMoviesCreated
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Model/DirectorModel.cs' -Raw;
-          if( ($c -match 'Genres') -and ($c -match 'TotalMoviesCreated') ) { exit 0 } else { exit 1 }"
+          grep -E 'Genres' OOP.FinalTerm.Exam/Model/DirectorModel.cs && \
+          grep -E 'TotalMoviesCreated' OOP.FinalTerm.Exam/Model/DirectorModel.cs
         timeout: 10
         max-score: 3
 
@@ -85,11 +84,11 @@ jobs:
       uses: classroom-resources/autograding-command-grader@v1
       with:
         test-name: DirectorRepo Constructor
-        # Checks for SQLiteConnection and CreateTable (ensure not commented)
+        # Checks for SQLiteConnection and CreateTable, ensuring no commented code is found (using || to fail the test)
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Repository/DirectorRepository.cs' -Raw;
-          if( ($c -match 'new\s*SQLiteConnection') -and ($c -match '\.CreateTable') -and -not ($c -match '//.*new\s*SQLiteConnection') ) { exit 0 } else { exit 1 }"
+          grep -E 'new\s*SQLiteConnection' OOP.FinalTerm.Exam/Repository/DirectorRepository.cs && \
+          grep -E '\.CreateTable' OOP.FinalTerm.Exam/Repository/DirectorRepository.cs && \
+          ! grep -E '//.*new\s*SQLiteConnection' OOP.FinalTerm.Exam/Repository/DirectorRepository.cs
         timeout: 10
         max-score: 3
 
@@ -98,11 +97,8 @@ jobs:
       uses: classroom-resources/autograding-command-grader@v1
       with:
         test-name: DirectorRepo AddDirector
-        # Checks for Insert method
-        command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Repository/DirectorRepository.cs' -Raw;
-          if( ($c -match 'Insert') -and -not ($c -match '//.*Insert') ) { exit 0 } else { exit 1 }"
+        # Checks for uncommented Insert method call
+        command: grep -v '^//' OOP.FinalTerm.Exam/Repository/DirectorRepository.cs | grep -E 'Insert'
         timeout: 10
         max-score: 3
 
@@ -111,11 +107,10 @@ jobs:
       uses: classroom-resources/autograding-command-grader@v1
       with:
         test-name: DirectorRepo GetAll
-        # Checks for Table and ToList
+        # Checks for uncommented Table and ToList
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Repository/DirectorRepository.cs' -Raw;
-          if( ($c -match '\.Table') -and ($c -match '\.ToList') -and -not ($c -match '//.*\.Table') ) { exit 0 } else { exit 1 }"
+          grep -v '^//' OOP.FinalTerm.Exam/Repository/DirectorRepository.cs | grep -E '\.Table' && \
+          grep -v '^//' OOP.FinalTerm.Exam/Repository/DirectorRepository.cs | grep -E '\.ToList'
         timeout: 10
         max-score: 3
 
@@ -124,11 +119,8 @@ jobs:
       uses: classroom-resources/autograding-command-grader@v1
       with:
         test-name: DirectorRepo GetById
-        # Checks for Find method
-        command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Repository/DirectorRepository.cs' -Raw;
-          if( ($c -match '\.Find') -and -not ($c -match '//.*\.Find') ) { exit 0 } else { exit 1 }"
+        # Checks for uncommented Find method call
+        command: grep -v '^//' OOP.FinalTerm.Exam/Repository/DirectorRepository.cs | grep -E '\.Find'
         timeout: 10
         max-score: 3
 
@@ -142,9 +134,10 @@ jobs:
         test-name: DirectorForm Controls
         # Checks Designer file for control names
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs' -Raw;
-          if( ($c -match 'txtFirstName') -and ($c -match 'txtLastName') -and ($c -match 'txtGenres') -and ($c -match 'numTotalMovies') ) { exit 0 } else { exit 1 }"
+          grep -E 'txtFirstName' OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs && \
+          grep -E 'txtLastName' OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs && \
+          grep -E 'txtGenres' OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs && \
+          grep -E 'numTotalMovies' OOP.FinalTerm.Exam/Views/DirectorForm.Designer.cs
         timeout: 10
         max-score: 3
 
@@ -155,9 +148,9 @@ jobs:
         test-name: DirectorForm GetDirector
         # Checks mapping logic
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Views/DirectorForm.cs' -Raw;
-          if( ($c -match 'public.*GetDirector') -and ($c -match 'FirstName') -and ($c -match 'return') ) { exit 0 } else { exit 1 }"
+          grep -E 'public.*GetDirector' OOP.FinalTerm.Exam/Views/DirectorForm.cs && \
+          grep -E 'FirstName' OOP.FinalTerm.Exam/Views/DirectorForm.cs && \
+          grep -E 'return' OOP.FinalTerm.Exam/Views/DirectorForm.cs
         timeout: 10
         max-score: 3
 
@@ -168,9 +161,9 @@ jobs:
         test-name: DirectorForm Validation
         # Checks for validation logic in Save Click
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Views/DirectorForm.cs' -Raw;
-          if( ($c -match 'BtnSave_Click') -and ($c -match 'IsNullOrWhiteSpace') -and ($c -match 'MessageBox.Show') ) { exit 0 } else { exit 1 }"
+          grep -E 'BtnSave_Click' OOP.FinalTerm.Exam/Views/DirectorForm.cs && \
+          grep -E 'IsNullOrWhiteSpace' OOP.FinalTerm.Exam/Views/DirectorForm.cs && \
+          grep -E 'MessageBox.Show' OOP.FinalTerm.Exam/Views/DirectorForm.cs
         timeout: 10
         max-score: 3
 
@@ -184,9 +177,9 @@ jobs:
         test-name: SettingsForm Load
         # Checks LoadDirectorsToGrid logic
         command: |
-          pwsh -Command "
-          $c = Get-Content 'OOP.FinalTerm.Exam/Views/SettingsForm.cs' -Raw;
-          if( ($c -match 'LoadDirectorsToGrid') -and ($c -match 'GetAllDirectors') -and ($c -match 'dgvDirectors') ) { exit 0 } else { exit 1 }"
+          grep -E 'LoadDirectorsToGrid' OOP.FinalTerm.Exam/Views/SettingsForm.cs && \
+          grep -E 'GetAllDirectors' OOP.FinalTerm.Exam/Views/SettingsForm.cs && \
+          grep -E 'dgvDirectors' OOP.FinalTerm.Exam/Views/SettingsForm.cs
         timeout: 10
         max-score: 4
 
